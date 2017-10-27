@@ -1,0 +1,40 @@
+div.dropdown-container {
+  float: left; 
+  display: block; 
+  width: 250px; 
+  margin-top: 20px;
+}
+
+div.dropdown-container.show>div.dropdown-list {
+ transform: scale(1, 1);
+}
+
+div.dropdown-container>div.dropdown-display {
+  float: left;
+  width: 100%;
+  background: white;
+  height: 20px;
+  cursor: pointer;
+  border: solid 1px;
+}
+
+div.dropdown-container>div.dropdown-list { 
+  float: left; 
+  width: 100%; 
+  position: relative; 
+  width: 100%; 
+  transform: scale(1, 0);
+}
+
+div.dropdown-container>div.dropdown-list>div{
+  float: left; 
+  width:100%; 
+  padding: 0 5; 
+  font-size:14px;   
+  border:solid 1px black; 
+  border-top:none;
+}
+
+div.dropdown-container>div.dropdown-list>div:hover{
+  cursor: pointer;
+}

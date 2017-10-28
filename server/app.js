@@ -6,6 +6,8 @@ const morgan = require('morgan')
 const path = require('path')
 const fs = require('fs')
 
+require('./database/db')
+
 require('babel-register')({
   ignore: /\/(build|node_modules)\//,
   presets: ['env', 'react-app']

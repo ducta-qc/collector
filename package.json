@@ -1,10 +1,11 @@
 {
-  "name": "ssr-create-react-app-v2",
+  "name": "collector",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-env": "^1.5.1",
+    "babel-preset-react-app": "^3.0.3",
     "react-scripts": "^1.0.6"
   },
   "dependencies": {
@@ -13,11 +14,13 @@
     "express": "^4.15.2",
     "ignore-styles": "^5.0.1",
     "morgan": "^1.8.1",
+    "mysql2": "^1.4.2",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-redux": "^5.0.4",
     "react-router-dom": "^4.1.1",
-    "redux": "^3.6.0"
+    "redux": "^3.6.0",
+    "sequelize": "^4.19.0"
   },
   "scripts": {
     "start": "react-scripts start",

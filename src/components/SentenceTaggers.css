@@ -1,21 +1,52 @@
 div.dropdown-container {
   float: left; 
   display: block; 
-  width: 250px; 
-  margin-top: 20px;
+  width: 70px;
+}
+
+div.dropdown-container.show {
+  width: 180px; 
 }
 
 div.dropdown-container.show>div.dropdown-list {
- transform: scale(1, 1);
+  transform: scale(1, 1); 
 }
 
 div.dropdown-container>div.dropdown-display {
-  float: left;
   width: 100%;
   background: white;
   height: 20px;
   cursor: pointer;
   border: solid 1px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+div.dropdown-container>div.dropdown-display>span.cancel-tag{
+  padding-bottom: 4px;
+  padding-right: 3px;
+  padding-left: 3px;
+  font-weight: bold;
+  position: absolute;
+  right: 0px;
+}
+
+div.dropdown-container>div.dropdown-display>span.cancel-tag:hover{
+  color: #87CEFA;
+  background-color: black;
+  font-weight: bold;
+}
+
+div.dropdown-container>div.dropdown-display>span.display-tag{
+  padding-left: 3px;
+  font-size: 11px;
+}
+
+.tag-item{
+  padding-left: 6px;
+  font-size: 14px;
 }
 
 div.dropdown-container>div.dropdown-list { 
@@ -37,4 +68,41 @@ div.dropdown-container>div.dropdown-list>div{
 
 div.dropdown-container>div.dropdown-list>div:hover{
   cursor: pointer;
+}
+
+div.dropdown-container>div.dropdown-list>div>div:hover{
+  color: #87CEFA;
+  background-color: black;
+}
+
+div.sentence-inline{
+  display: inline-block;
+  padding-right: 10px;
+}
+
+div.sentence-inline>div.tags{
+  position: relative;
+  display: block;
+  margin-top: 5px;
+  float: right;
+}
+
+div.sentence-inline>div.tags>div.add-tag{
+  border: solid 1px black;
+  padding-bottom: 3px;
+  padding-right: 3px;
+  padding-left: 3px;
+  font-weight: bold;
+}
+
+div.sentence-inline>div.tags>div.add-tag:hover{
+  cursor: pointer;
+  color: #87CEFA;
+  background-color: black;
+  font-weight: bold;
+}
+
+.submit-bt{
+  padding: 3px;
+  border-radius: 5px;
 }

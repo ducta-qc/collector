@@ -11,7 +11,7 @@ const {default: App} = require('../src/containers/App')
 
 module.exports = function universalLoader(req, res) {
   const filePath = path.resolve(__dirname, '..', 'build', 'index.html')
-
+  
   fs.readFile(filePath, 'utf8', (err, htmlData)=>{
     if (err) {
       console.error('read err', err)

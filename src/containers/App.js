@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { Switch, Route } from 'react-router-dom'
-import { TagDropdownMenu, SenTaggers } from '../components/SentenceTaggers'
+import { SenTaggers } from '../components/SentenceTaggers'
 
 export default class App extends Component {
   render(){

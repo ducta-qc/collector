@@ -26,14 +26,6 @@ class TagDropdownMenu extends Component {
     this.state = initState;
   }
 
-  componentWillReceiveProps(nextProps){
-    console.log('componentWillReceiveProps');
-    if (this.selected !== nextProps.selected){
-      this.selected = nextProps.selected;
-      this.setState({ showTag: true });
-    }
-  }
-
   listItems (){
     var items = [];
     for (var i = 0; i < this.props.list.length; i++){

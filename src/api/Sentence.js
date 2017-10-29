@@ -27,7 +27,6 @@ var importTaggedSentence = function (data, callback, errCb){
     dataType: ENDPOINTS.fetchRawSen.dataType,
     data: JSON.stringify(data),
     success: function(msg){
-      console.log('callback');
       callback(msg);
     },
     error: function(xhr, textStatus, error){

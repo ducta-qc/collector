@@ -28,6 +28,7 @@ app.use(compression())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
+
 // Setup logger
 app.use(morgan('combined'))
 

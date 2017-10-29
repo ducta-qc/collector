@@ -1,5 +1,9 @@
 import React, { Component } from 'react'
 import './SentenceTaggers.css'
+import { nerAPI } from '../api/Sentence'
+import { TAGS, INTENTS } from '../types/car'
+import { ERROR_CODES } from '../../src/types/errorCodes'
+
 
 class TagDropdownMenu extends Component {
   constructor (props){
@@ -22,6 +26,14 @@ class TagDropdownMenu extends Component {
     this.state = initState;
   }
 
+  componentWillReceiveProps(nextProps){
+    console.log('componentWillReceiveProps');
+    if (this.selected !== nextProps.selected){
+      this.selected = nextProps.selected;
+      this.setState({ showTag: true });
+    }
+  }
+
   listItems (){
     var items = [];
     for (var i = 0; i < this.props.list.length; i++){
@@ -42,14 +54,18 @@ class TagDropdownMenu extends Component {
   }
 
   show (){
-    this.setState({ listVisible: true });
-    this.hidden_bind = this.hidden.bind(this);
-    document.addEventListener("click", this.hidden_bind);
+    if (!this.state.listVisible){
+      this.setState({ listVisible: true });
+      this.hiddenBind = this.hidden.bind(this);
+      document.addEventListener("click", this.hiddenBind);
+    }
   }
 
   hidden (){
-    this.setState({ listVisible: false });
-    document.removeEventListener("click", this.hidden_bind);
+    if (this.state.listVisible){
+      this.setState({ listVisible: false });
+      document.removeEventListener("click", this.hiddenBind);
+    }
   }
 
   cancelTag (){
@@ -89,60 +105,87 @@ class TagDropdownMenu extends Component {
   }
 };
 
-class SenTaggers extends Component {
-  constructor (props){
+class TaskBox extends Component{
+  constructor(props) {
     super(props);
-    this.tags = [
-      'O',
-      'CarBody',
-      'CarColor',
-      'CarFuel',
-      'Cartirebrand',
-      'CarTrasmission',
-      'CarDimension',
-      'OperatorCompare',
-      'CarElement',
-      'CarPosition',
-      'CarPurposeUsage',
-      'CarClass',
-      'DateTime',
-      'CarEngine',
-      'CarWheelDrive',
-      'CarStyle',
-      'CarSize',
-      'CarPriceCondition',
-      'CarModel',
-      'CarVersion',
-      'CarBrand',
-      'CarSeat',
-      'CarPrice',
-      'CarSeries',
-      'CarYear',
-      'LocationCity',
-      'CarTransmission',
-      'CarEngineDisplacement',
-      'LocationDistrict',
-      'LocationTown',
-      'PhoneNumber',
-      'CarDoor',
-      'PhoneVerifyCode',
-      'LocationProvince',
-      'Email'
-    ];
     this.state = {
-      elemToks: []
+      inputValue: ""
+    }
+  }
+
+  updateInputValue(e) {
+    this.setState({
+      inputValue: e.target.value
+    })
+  }
+
+  render() {
+    return(
+      <div className="inline">
+        <input value={this.state.inputValue} onChange={this.updateInputValue.bind(this)}/>
+      </div>
+    )
+  }
+};
+
+class IntentMenu extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      intent: this.props.initIntent,
+      elems: []
     };
   }
 
   componentDidMount() {
-    this.currSen = "This is sentence tagger";
-    this.tokens = this.currSen.split(" ");
-    this.currTags = [];
-    for (var i=0; i < this.tokens.length; i++){
-      this.currTags.push(this.tags[0])
+    var elems = [];
+    for (var i=0; i < this.props.list.length; i++){
+      elems.push(<option key={this.props.list[i]} value={this.props.list[i]}>{this.props.list[i]}</option>);
     }
+    this.setState({elems: elems});
+    
+  }
 
-    this.renderTokens();
+  componentWillReceiveProps(nextProps){
+    if (this.props.initIntent !== nextProps.initIntent){
+      this.setState({intent: nextProps.initIntent});
+    }
+  }
+
+  handleChange(e) {
+    this.setState({intent:e.target.value});
+  }
+
+  render() {
+    return (
+      <div className="inline">
+        <select value={this.state.intent} onChange={this.handleChange.bind(this)}>
+          {this.state.elems}
+        </select>
+      </div>
+    )
+  }
+}
+
+class SenTaggers extends Component {
+  constructor (props){
+    super(props);
+    this.tags = TAGS;
+    this.intents = INTENTS;
+
+    this.state = {
+      elemToks: [],
+      errorDisplayText: "Please fill the task field and press submit button to get a sample"
+    };
+
+    this.currSen = "";
+    this.intent = "";
+    this.hash = "";
+    this.currTags = [];
+    this.tokens = [];
+  }
+
+  componentDidMount() {
   }
 
   updateTags(tagName, tokIdx){
@@ -150,8 +193,14 @@ class SenTaggers extends Component {
   }
 
   renderTokens() {
-    var elemToks = [];
+    this.tokens = this.currSen.split(" ");
+    this.currTags = [];
     for (var i=0; i < this.tokens.length; i++){
+      this.currTags.push(this.tags[0]);
+    }
+
+    var elemToks = [];
+    for (i=0; i < this.tokens.length; i++){
       elemToks.push(
         <div className={"sentence-inline"} key={this.tokens[i]+"_"+i}>
           {this.tokens[i]}
@@ -162,11 +211,87 @@ class SenTaggers extends Component {
     this.setState({ elemToks: elemToks });
   }
 
+  fetchRawSentence(){
+    // Get a new sentence
+    var taskElem = this.refs.taskInput;
+    nerAPI.getRawSentence(
+      {task: taskElem.state.inputValue},
+      function (result){
+        this.currSen = result.sentence;
+        this.intent = result.intent;
+        this.hash = result.hash;
+        var renderTokens = this.renderTokens.bind(this);
+        renderTokens();
+      }.bind(this),
+      function (error){
+        if (typeof error !== 'undefined'){
+          if(error.name === ERROR_CODES.taggedSenNotFound.name){
+            this.currSen = "";
+            this.intent = "";
+            this.hash = "";
+            this.currTags = [];
+            this.tokens = [];
+            this.setState({elemToks:[], errorDisplayText: ERROR_CODES.taggedSenNotFound.message});
+          }
+        }
+      }.bind(this)
+    );  
+  }
+
+  submit(){
+    var taskElem = this.refs.taskInput;
+    if (this.currSen !== ""){
+      // Submit tagged sentence
+      var taggedToks = [];
+      var concatToks = "";
+      for (var i=0; i < this.currTags.length; i++){
+        if (this.currTags[i] !== ""){
+          concatToks += (this.tokens[i] + "/" + this.currTags[i]);
+          taggedToks.push(concatToks);
+          concatToks = "";
+        }else{
+          concatToks += this.tokens[i];
+        }
+      }
+
+      var taggedSen = taggedToks.join(" | ");
+      
+      nerAPI.importTaggedSentence(
+        {taggedSens:[{sentence: taggedSen, hash: this.hash, intent: this.intent, task: taskElem.state.inputValue}]}, 
+        function (result){
+          var fetchRawSentence = this.fetchRawSentence.bind(this);
+          fetchRawSentence(); 
+        }.bind(this)
+      );
+    } else{
+      this.fetchRawSentence();
+    }
+    
+  }
+
   render (){
+    var senIsNull = (this.state.elemToks.length === 0);
     return (
-        <div>
-          {this.state.elemToks}
-          <button className="submit-bt">Submit</button>
+        <div className="sentence-taggers">
+          <div>
+            <div className="inline">
+              <span className="text-bold-600"> Task: </span>
+              <TaskBox ref="taskInput"></TaskBox>
+            </div>
+            <div className="inline">
+              <span className="text-bold-600"> Intent: </span>
+              <IntentMenu ref="intentInput" initIntent={this.intent} list={this.intents}></IntentMenu>
+            </div>
+          </div>
+          <div className="display-sentence">
+            <p class="text-bold-600">Sentence:</p>
+            {(senIsNull ?  this.state.errorDisplayText : this.state.elemToks)}
+          </div>
+          <div className="bt-container">
+            <div className="inline"><button className="submit-bt" onClick={this.submit.bind(this)}>Submit</button></div>
+            <div className="inline"><button className="report-bt">Report</button></div>
+          </div>
+
         </div>
     )
   }

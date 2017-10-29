@@ -1,12 +1,15 @@
 import React, { Component } from 'react'
-import { SenTaggers } from '../components/SentenceTaggers'
+import { Switch, Route } from 'react-router-dom'
+import NERPage from './pages/NER'
 
 export default class App extends Component {
   render(){
     return (
       <div>
-        <h1>Sentence Taggers</h1>
-        <SenTaggers></SenTaggers>
+        <Switch>
+          <Route exact path="/" component={NERPage}/>
+          <Route path="/ner" component={NERPage}/>
+        </Switch>
       </div>
     )
   }

@@ -1,0 +1,13 @@
+.statistic-page{
+  margin-left: 50px;
+  margin-top: 50px;
+}
+
+div.stat-text{
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+div.intent-stat-item{
+  padding: 3px;
+}

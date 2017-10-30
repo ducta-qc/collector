@@ -1,0 +1,5 @@
+id,sentence,task,hash,tagged,intent,report,createAt,updateAt,taggedSentence
+1,"Tim xe mazda3",otonhanh,7963c5044ebb2b70d132861ec88aa99a,1,,0,"2017-10-30 11:29:53","2017-10-30 15:59:21","Tim/O | xe/O | mazda3/O"
+2,"Xe 4 cho",otonhanh,c319a20e8d4b147b13585a54e0ffc6d5,1,find_car,0,"2017-10-30 11:32:04","2017-10-30 15:59:22","Xe/O | 4/O | cho/O"
+3,"Xe 7 ty",test,ee5aa80051a72be115e6e095371ae72c,0,find_car,0,"2017-10-30 13:11:39","2017-10-30 06:24:38","Xe/O | 7/O | ty/O"
+4,abaccasdf,otonhanh,6aa8fd096c8d3c6663976d43c3a7e8a0,0,tet_intent,1,"2017-10-30 16:54:10","2017-10-30 18:29:26",NULL

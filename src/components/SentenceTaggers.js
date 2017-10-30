@@ -101,20 +101,49 @@ class TaskBox extends Component{
   constructor(props) {
     super(props);
     this.state = {
-      inputValue: ""
+      inputValue: "",
+      elems: []
+    }
+    this.firstRecv = false;
+  }
+
+  updateWithProps(props, setDefault){
+    var elems = [];
+    for (var i=0; i < props.list.length; i++){
+      elems.push(<option key={props.list[i]} value={props.list[i]}>{props.list[i]}</option>);
+    }
+    if(setDefault){
+      this.setState({elems: elems, inputValue:props.list[0]});
+      return;
+    }
+    this.setState({elems: elems});
+  }
+
+  componentWillReceiveProps(nextProps){
+    if (!this.firstRecv){
+      this.updateWithProps(nextProps, true);
+      this.firstRecv = true;
+    } else {
+      this.updateWithProps(nextProps, false);
     }
   }
 
-  updateInputValue(e) {
-    this.setState({
-      inputValue: e.target.value
-    })
+  componentDidMount() {
+    this.updateWithProps(this.props, true);
+  }
+
+  handleChange(e) {
+    var oldInputValue = this.state.inputValue;
+    this.props.callback(oldInputValue, e.target.value);
+    this.setState({inputValue: e.target.value});
   }
 
   render() {
     return(
       <div className="inline">
-        <input value={this.state.inputValue} onChange={this.updateInputValue.bind(this)}/>
+        <select value={this.state.inputValue} onChange={this.handleChange.bind(this)}>
+          {this.state.elems}
+        </select>
       </div>
     )
   }
@@ -129,23 +158,34 @@ class IntentMenu extends Component{
     };
   }
 
-  componentDidMount() {
+  updateWithProps(props, intent){
     var elems = [];
-    for (var i=0; i < this.props.list.length; i++){
-      elems.push(<option key={this.props.list[i]} value={this.props.list[i]}>{this.props.list[i]}</option>);
+    for (var i=0; i < props.list.length; i++){
+      elems.push(<option key={props.list[i]} value={props.list[i]}>{props.list[i]}</option>);
     }
-    this.setState({elems: elems});
+    if (!intent){
+      this.setState({elems: elems});  
+    }else{
+      this.setState({elems: elems, intent:intent});
+    }
     
   }
 
+  componentDidMount() {
+    this.updateWithProps(this.props, null);
+  }
+
   componentWillReceiveProps(nextProps){
-    if (this.props.initIntent !== nextProps.initIntent){
-      this.setState({intent: nextProps.initIntent});
+    if (this.props.initIntent !== nextProps.initIntent || 
+      this.props.list.length < nextProps.list.length){
+      this.updateWithProps(nextProps, nextProps.initIntent);
     }
   }
 
   handleChange(e) {
+    var oldValue = this.state.intent;
     this.setState({intent:e.target.value});
+    this.props.callback(oldValue, e.target.value);
   }
 
   render() {
@@ -159,25 +199,37 @@ class IntentMenu extends Component{
   }
 }
 
+var DEFAULT_ERROR_TEXT = "Please fill the task field and press submit button to get a sample"; 
+
 class SenTaggers extends Component {
   constructor (props){
     super(props);
     this.tags = TAGS;
-    this.intents = INTENTS;
-
+    this.initParams();
     this.state = {
       elemToks: [],
-      errorDisplayText: "Please fill the task field and press submit button to get a sample"
+      errorDisplayText: DEFAULT_ERROR_TEXT,
+      nerTasks: [],
+      intents: INTENTS,
+      intent: INTENTS[0]
     };
+  }
 
+  initParams(){
+    this.currSenId = -1;
     this.currSen = "";
-    this.intent = "";
+    this.currIntent = "";
     this.hash = "";
     this.currTags = [];
     this.tokens = [];
   }
 
   componentDidMount() {
+    // Get NER tasks in database
+    nerAPI.getNERTasks({},
+    function (results){
+      this.setState({nerTasks: results});
+    }.bind(this))
   }
 
   updateTags(tagName, tokIdx){
@@ -185,6 +237,10 @@ class SenTaggers extends Component {
   }
 
   renderTokens() {
+    var intents = this.state.intents;
+    if(this.state.intents.indexOf(this.currIntent) === -1){
+      intents = [this.currIntent].concat(intents);
+    }
     this.tokens = this.currSen.split(" ");
     this.currTags = [];
     for (var i=0; i < this.tokens.length; i++){
@@ -200,7 +256,7 @@ class SenTaggers extends Component {
           </TagDropdownMenu>
         </div> );
     }
-    this.setState({ elemToks: elemToks });
+    this.setState({ elemToks: elemToks, intents: intents, intent: this.currIntent});
   }
 
   fetchRawSentence(){
@@ -209,8 +265,9 @@ class SenTaggers extends Component {
     nerAPI.getRawSentence(
       {task: taskElem.state.inputValue},
       function (result){
+        this.currSenId = result.id;
         this.currSen = result.sentence;
-        this.intent = result.intent;
+        this.currIntent = result.intent;
         this.hash = result.hash;
         var renderTokens = this.renderTokens.bind(this);
         renderTokens();
@@ -219,7 +276,7 @@ class SenTaggers extends Component {
         if (typeof error !== 'undefined'){
           if(error.name === ERROR_CODES.taggedSenNotFound.name){
             this.currSen = "";
-            this.intent = "";
+            this.currIntent = "";
             this.hash = "";
             this.currTags = [];
             this.tokens = [];
@@ -249,7 +306,7 @@ class SenTaggers extends Component {
       var taggedSen = taggedToks.join(" | ");
       
       nerAPI.importTaggedSentence(
-        {taggedSens:[{sentence: taggedSen, hash: this.hash, intent: this.intent, task: taskElem.state.inputValue}]}, 
+        {taggedSens:[{sentence: taggedSen, hash: this.hash, intent: this.currIntent, task: taskElem.state.inputValue}]}, 
         function (result){
           var fetchRawSentence = this.fetchRawSentence.bind(this);
           fetchRawSentence(); 
@@ -261,27 +318,75 @@ class SenTaggers extends Component {
     
   }
 
+  componentWillMount() {
+      document.addEventListener("keydown", this.enter.bind(this));
+  }
+
+  componentWillUnmount() {
+      document.removeEventListener("keydown", this.enter.bind(this));
+  }  
+
+  enter(e) {
+    if(e.key === "Enter"){
+      this.submit();
+    }
+  }
+
+  report(e) {
+    var fetchRawSentence = this.fetchRawSentence.bind(this);
+    nerAPI.reportSentence(
+      {id: this.currSenId},
+      function (result){
+        fetchRawSentence(); 
+      },
+      function (err){
+        alert(err.message);
+        fetchRawSentence();
+      }
+    )
+  }
+
+  changeTaskCallback(oldValue, newValue){
+    if(oldValue !== newValue){
+      this.initParams();
+      this.setState({
+        elemToks: [],
+        errorDisplayText: DEFAULT_ERROR_TEXT,
+      });
+    }
+  }
+
+  changeIntentCallback(oldValue, newValue){
+    if(oldValue !== newValue){
+      this.currIntent = newValue;
+    }
+  }
+
   render (){
     var senIsNull = (this.state.elemToks.length === 0);
+
     return (
         <div className="sentence-taggers">
           <div>
             <div className="inline">
               <span className="text-bold-600"> Task: </span>
-              <TaskBox ref="taskInput"></TaskBox>
+              <TaskBox ref="taskInput" list={this.state.nerTasks} callback={this.changeTaskCallback.bind(this)}></TaskBox>
             </div>
-            <div className="inline">
+            <div className="inline intent-box">
               <span className="text-bold-600"> Intent: </span>
-              <IntentMenu ref="intentInput" initIntent={this.intent} list={this.intents}></IntentMenu>
+              <IntentMenu ref="intentInput" list={this.state.intents} 
+              initIntent={this.state.intent} callback={this.changeIntentCallback.bind(this)}></IntentMenu>
             </div>
           </div>
           <div className="display-sentence">
-            <p class="text-bold-600">Sentence:</p>
+            <p className="text-bold-600">Sentence:</p>
             {(senIsNull ?  this.state.errorDisplayText : this.state.elemToks)}
           </div>
           <div className="bt-container">
-            <div className="inline"><button className="submit-bt" onClick={this.submit.bind(this)}>Submit</button></div>
-            <div className="inline"><button className="report-bt">Report</button></div>
+            <div className="inline"><button className="submit-bt" 
+                 onClick={this.submit.bind(this)}>Submit</button></div>
+            <div className="inline"><button className="report-bt"
+                 onClick={this.report.bind(this)}>Report</button></div>
           </div>
 
         </div>
@@ -289,4 +394,4 @@ class SenTaggers extends Component {
   }
 };
 
-export{TagDropdownMenu, SenTaggers};
+export{TagDropdownMenu, SenTaggers, IntentMenu, TaskBox};

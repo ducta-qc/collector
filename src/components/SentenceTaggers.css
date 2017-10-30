@@ -1,6 +1,7 @@
 .sentence-taggers{
   position: relative;
   margin-left: 50px;
+  margin-top: 50px;
 }
 
 div.sentence-taggers>div.display-sentence{
@@ -147,4 +148,8 @@ div.sentence-inline>div.tags>div.add-tag:hover{
 
 .bt-container>div{
   padding-right: 10px;
+}
+
+.intent-box{
+  padding-left: 10px;
 }

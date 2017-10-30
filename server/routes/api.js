@@ -21,8 +21,16 @@ router.post('/import_tagged_sen', function (req, res, next){
   NERHandler.importTaggedSen(req, res, next);
 })
 
+router.post('/report_sen', function (req, res, next){
+  NERHandler.reportSentence(req, res, next);
+})
+
 router.post('/get_ner_tasks', function (req, res, next){
   NERHandler.getNERTasks(req, res, next);
+})
+
+router.post('/get_ner_tasks_stat', function (req, res, next){
+  NERHandler.getNERTaskStat(req, res, next);
 })
 
 module.exports = router;

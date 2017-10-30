@@ -4,32 +4,17 @@ var FlakeId = require('flakeid');
 var db = new Sequelize(
     'collector', 'root', '123qwe',{host: 'localhost', dialect: 'mysql'});
 
-var RawNER = db.define('raw_ner',{
+var NER = db.define('ner',{
   id: {type: Sequelize.BIGINT, primaryKey: true},
   sentence: {type: Sequelize.TEXT('medium'), allowNull: false},
   task: {type: Sequelize.STRING, allowNull: false},
   tagged: {type: Sequelize.BOOLEAN, allowNull: false},
   hash: {type: Sequelize.CHAR(32), allowNull: false},
   intent: {type: Sequelize.STRING, allowNull: true},
-  report: {type: Sequelize.BOOLEAN}
-},{
-  freezeTableName: true,
-  timestamps: false
-});
-
-var TaggedNER = db.define('tagged_ner',{
-  id: {
-    type: Sequelize.STRING, 
-    primaryKey: true,
-    references:{
-      model: RawNER,
-      key: 'hash'
-    }
-  },
-  sentence: {type: Sequelize.TEXT('medium'), allowNull: false},
-  intent: {type: Sequelize.STRING, allowNull: true},
-  task: {type: Sequelize.STRING, allowNull: true},
-  report: {type: Sequelize.BOOLEAN}
+  report: {type: Sequelize.BOOLEAN},
+  taggedSentence: {type: Sequelize.TEXT('medium'), allowNull: true},
+  createAt: {type: Sequelize.DATE, defaultValue: Sequelize.NOW, allowNull: false},
+  updateAt: {type: Sequelize.DATE, defaultValue: Sequelize.NOW, allowNull: false}
 },{
   freezeTableName: true,
   timestamps: false
@@ -41,8 +26,7 @@ var flake = new FlakeId({
 });
 
 var models = {
-  RawNER: RawNER,
-  TaggedNER: TaggedNER,
+  NER: NER,
   flake: flake
 };
 

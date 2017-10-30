@@ -1,0 +1,37 @@
+div.task-header{
+  padding-left: 10px;
+}
+
+div.task-nav{
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+ul.horizontal {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+  display: block;
+}
+
+ul.horizontal li {
+    float: left;
+}
+
+ul.horizontal li a.active {
+    background-color: #4CAF50;
+}
+
+ul.horizontal li a:hover:not(.active) {
+    background-color: #000;
+}
+
+ul.horizontal li a {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}

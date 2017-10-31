@@ -30,14 +30,46 @@ NERHandler.getUntaggedSen = function (req, res, next){
             res.json(retSen);
           })
     .catch(function (err){
-      console.log(err)
-      return res.status(404).send(err);
+      return res.status(500).send(err);
     });
 };
 
 
 NERHandler.importUntaggedSen = function (req, res, next){
-  next();
+  var untaggedSens = req.body.untaggedSens;
+
+  async.each(untaggedSens, 
+    function (untaggedSen, callback){
+      var report = 0;
+      if (typeof untaggedSen.report !== "undefined"){
+        report = untaggedSen.report;
+      }
+      NER.create(
+        {
+          tagged: 0, report:0, sentence: untaggedSen.sentence,
+          task: untaggedSen.task, intent: untaggedSen.intent,
+          createdAt:utils.addHours(Date.now(), 7), 
+          updateAt: utils.addHours(Date.now(), 7)
+        })
+        .then(function (result) {
+          callback()
+        })
+        .catch(function (err){
+          callback(err, untaggedSen);
+        })
+    }, 
+    function (err, data){
+      if( err ) {
+        // One of the iterations produced an error.
+        // All processing will now stop.
+        console.log('A untagged sentence failed to process', data, err);
+        return res.status(500).send(ERROR_CODES.internalServerError);
+      } else {
+        console.log('All untagged sentences have been processed successfully');
+        return res.status(200).send({});
+      }
+    }
+  )
 };
 
 
@@ -103,7 +135,7 @@ NERHandler.reportSentence = function (req, res, next){
     {report: 1, updateAt: utils.addHours(Date.now(), 7)},
     {where: {id: senId}})
     .then(function (result) {
-      // Update tagged field
+      // Update report field
       return res.status(200).send({});
     })
     .catch(function (err){
@@ -201,5 +233,66 @@ NERHandler.getNERTaskStat = function (req, res, next){
       return res.status(500).send(ERROR_CODES.internalServerError);
     })
 };
+
+
+NERHandler.setUntaggedSen = function (req, res, next){
+  var senId = req.body.id;
+  var report = req.body.report;
+
+  NER.update(
+    {tagged: 0, report: report, updateAt: utils.addHours(Date.now(), 7)},
+    {where: {id: senId}})
+    .then(function (result) {
+      // Update tagged field
+      return res.status(200).send({});
+    })
+    .catch(function (err){
+      return res.status(500).send(ERROR_CODES.internalServerError);
+    })
+};
+
+
+NERHandler.pagingSen = function (req, res, next){
+  var lastItemDate = req.body.lastItemDate;
+  var pageCount = req.body.pageCount;
+
+  if (lastItemDate === null or typeof lastItemDate === 'undefined'){
+    lastItemDate = 2e9;
+  }
+
+  NER.findAll({
+      where:{
+        createAt:{
+          [Op.lte]: lastItemDate
+        }
+      },
+      limit: pageCount,
+      order: [['createAt', 'DESC']],
+
+  })
+  .then(function (results){
+    if(results.length == 0){
+      throw createErrorWithCode(ERROR_CODES.taggedSenNotFound)
+    }
+    var compactResults = [];
+    for (var i=0; i < results.length; i++){
+      compactResults.push({
+        id: retSen.id,
+        sentence: retSen.sentence,
+        task: retSen.task,
+        tagged: retSen.tagged,
+        hash: retSen.hash,
+        intent: retSen.intent
+      })
+    }
+    res.json(compactResults);
+  })
+  .catch(function (err){
+    return res.status(500).send(err);
+  })
+};
+
+
+
 
 module.exports = NERHandler;

@@ -3,6 +3,7 @@ var FlakeId = require('flakeid');
 
 var db = new Sequelize(
     'collector', 'root', '123qwe',{host: 'localhost', dialect: 'mysql'});
+const Op = Sequelize.Op;
 
 var NER = db.define('ner',{
   id: {type: Sequelize.BIGINT, primaryKey: true},
@@ -27,7 +28,8 @@ var flake = new FlakeId({
 
 var models = {
   NER: NER,
-  flake: flake
+  flake: flake,
+  Op: Op
 };
 
 module.exports = models;

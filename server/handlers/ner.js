@@ -256,7 +256,7 @@ NERHandler.pagingSen = function (req, res, next){
   var lastItemDate = req.body.lastItemDate;
   var pageCount = req.body.pageCount;
 
-  if (lastItemDate === null or typeof lastItemDate === 'undefined'){
+  if (lastItemDate === null || typeof lastItemDate === 'undefined'){
     lastItemDate = 2e9;
   }
 

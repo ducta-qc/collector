@@ -1,0 +1,25 @@
+.ner-imports {
+  position: relative;
+  margin-left: 50px;
+  margin-top: 50px;
+}
+
+div.manual-import {
+  padding-top: 30px;	
+}
+
+div.manual-task {
+  padding-top: 5px;
+}
+
+div.manual-sentence {
+  padding-top: 5px;
+}
+
+div.manual-intent {
+  padding-top: 5px;
+}
+
+div.manual-submit {
+  padding-top: 10px;
+}

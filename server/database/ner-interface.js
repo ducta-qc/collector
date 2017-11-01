@@ -1,16 +1,17 @@
 const async = require('async');
-const models = require('../database/db');
+const models = require('./db');
 const utils = require('../common/utils');
+const crypto = require('crypto');
+var NERInterface = {};
+
 import { createErrorWithCode } from '../common/errors';
 import { ERROR_CODES } from '../../src/types/errorCodes';
 
-var NERHandler = {};
 var NER = models.NER;
+var flake = models.flake;
 
-
-NERHandler.getUntaggedSen = function (req, res, next){
-  var task = req.body.task;
-
+NERInterface.getUntaggedSen = function (data, callback){
+  var task = data.task;
   NER.findAll({
       where:{tagged: 0, task: task, report: 0}, 
       limit:1})
@@ -27,57 +28,87 @@ NERHandler.getUntaggedSen = function (req, res, next){
               hash: retSen.hash,
               intent: retSen.intent
             };
-            res.json(retSen);
+            callback(null, retSen);
+            return null;
           })
     .catch(function (err){
-      return res.status(500).send(err);
+      callback(err);
+      return null;
     });
-};
+}
 
 
-NERHandler.importUntaggedSen = function (req, res, next){
-  var untaggedSens = req.body.untaggedSens;
+NERInterface.importUntaggedSen = function (data, callback){
+  var untaggedSens = data.untaggedSens;
+  var numImported = 0;
+  var bulkHash = [];
+  var bulk = [];
 
-  async.each(untaggedSens, 
-    function (untaggedSen, callback){
-      var report = 0;
-      if (typeof untaggedSen.report !== "undefined"){
-        report = untaggedSen.report;
-      }
-      NER.create(
-        {
-          tagged: 0, report:0, sentence: untaggedSen.sentence,
-          task: untaggedSen.task, intent: untaggedSen.intent,
-          createdAt:utils.addHours(Date.now(), 7), 
-          updateAt: utils.addHours(Date.now(), 7)
-        })
-        .then(function (result) {
-          callback()
+  for (var i=0; i < untaggedSens.length; i++){
+    var untaggedSen = untaggedSens[i];
+    var hash = crypto.createHash('md5').update(untaggedSen.sentence).digest("hex");
+    bulkHash.push(hash);
+    bulk.push({
+      tagged: 0, report:0, sentence: untaggedSen.sentence,
+      task: untaggedSen.task, intent: untaggedSen.intent,
+      id: parseInt(flake.gen()),
+      hash: hash,
+      createdAt:utils.addHours(Date.now(), 7), 
+      updateAt: utils.addHours(Date.now(), 7)
+    })
+  }
+
+  async.waterfall([
+    function(subCallback) {
+      NER.findAll(
+      {where:{hash:{in:bulkHash}}})
+      .then(function (results){
+        var existHashs = [];
+        for (i=0; i < results.length; i++){
+          existHashs.push(results[i].hash);
+        }
+
+        var filterBulk = [];
+        for (i=0; i < bulk.length; i++){
+          if(existHashs.indexOf(bulk[i].hash) === -1){
+            filterBulk.push(bulk[i]);
+          }else{
+            console.log("Replicate:", bulk[i].sentence);
+          }
+        }
+        subCallback(null, filterBulk);
+        return null;
+      })
+      .catch(function (err){
+        subCallback(err);
+        return null;
+      })
+    },
+    function(filterBulk, subCallback) {
+      NER.bulkCreate(filterBulk, {updateOnDuplicate:['createAt', 'updateAt']})
+        .then(function (){
+          numImported += filterBulk.length;
+          subCallback(null, {numImported: numImported});
+          return null;
         })
         .catch(function (err){
-          callback(err, untaggedSen);
+          subCallback(err);
+          return null;
         })
-    }, 
-    function (err, data){
-      if( err ) {
-        // One of the iterations produced an error.
-        // All processing will now stop.
-        console.log('A untagged sentence failed to process', data, err);
-        return res.status(500).send(ERROR_CODES.internalServerError);
-      } else {
-        console.log('All untagged sentences have been processed successfully');
-        return res.status(200).send({});
-      }
     }
-  )
-};
+  ], function (err, results) {
+      return callback(err, results)
+  });
 
-
-NERHandler.importTaggedSen = function (req, res, next){
-  var taggedSens = req.body.taggedSens;
   
+}
+
+
+NERInterface.importTaggedSen = function (data, callback){
+  var taggedSens = data.taggedSens;
+
   async.each(taggedSens, 
-    function (taggedSen, callback){
+    function (taggedSen, eachCallback){
       var report = 0;
       if (typeof taggedSen.report !== "undefined"){
         report = taggedSen.report;
@@ -88,29 +119,28 @@ NERHandler.importTaggedSen = function (req, res, next){
         {where: {hash: taggedSen.hash}})
         .then(function (result) {
           // Update tagged field
-            callback()
+            eachCallback()
+            return null;
         })
         .catch(function (err){
-          callback(err, taggedSen);
+          eachCallback(err, taggedSen);
+          return null;
         })
     }, 
-    function (err, data){
-      if( err ) {
-        // One of the iterations produced an error.
-        // All processing will now stop.
-        console.log('A tagged sentence failed to process', data, err);
-        return res.status(500).send(ERROR_CODES.internalServerError);
+    function (err, results){
+      if(err) {
+        console.log('A tagged sentence failed to process', results, err);
+        return callback(ERROR_CODES.internalServerError);
       } else {
         console.log('All tagged sentences have been processed successfully');
-        return res.status(200).send({});
+        return callback(null, {});
       }
     }
   )
-  
-};
+}
 
 
-NERHandler.getNERTasks = function (req, res, next){
+NERInterface.getNERTasks = function (data, callback){
   NER.aggregate('task', 'DISTINCT', { plain: false})
     .then(function(results){
       if(results.length == 0){
@@ -120,32 +150,33 @@ NERHandler.getNERTasks = function (req, res, next){
       for(var i=0; i < results.length; i++){
         compactResults.push(results[i].DISTINCT);
       }
-      res.json(compactResults);
+      callback(null, compactResults);
     })
     .catch(function (err){
-      return res.status(500).send(ERROR_CODES.internalServerError);
+      callback(err, ERROR_CODES.internalServerError);
     })
-};
+}
 
 
-NERHandler.reportSentence = function (req, res, next){
-  var senId = req.body.id;
-
+NERInterface.reportSentence = function (data, callback){
+  var id = data.id;
   NER.update(
     {report: 1, updateAt: utils.addHours(Date.now(), 7)},
     {where: {id: senId}})
     .then(function (result) {
-      // Update report field
-      return res.status(200).send({});
+      callback(null, {});
+      return null;
     })
     .catch(function (err){
-      return res.status(500).send(ERROR_CODES.internalServerError);
+      callback(ERROR_CODES.internalServerError);
+      return null;
     })
-};
+}
 
 
-NERHandler.getNERTaskStat = function (req, res, next){
-  var task = req.body.task;
+NERInterface.getNERTaskStat = function (data, callback){
+  var task = data.task;
+
   NER.aggregate('intent', 'DISTINCT', { plain: false, where:{ task: task }})
     .then(function (results){
         var compactIntents = ['*'];
@@ -156,7 +187,7 @@ NERHandler.getNERTaskStat = function (req, res, next){
           compactIntents.push('');
         }
         async.parallel({
-          intentStat: function (callback){
+          intentStat: function (intentStatCallback){
             var result = {};
             async.each(compactIntents, 
               function (intent, subCallback){
@@ -204,69 +235,66 @@ NERHandler.getNERTaskStat = function (req, res, next){
               },
               function (err, data){
                 if( err ) {
-                  callback(err);
+                  intentStatCallback(err);
                 } else {
-                  callback(null, result)
+                  intentStatCallback(null, result)
                 }
               }
             );
           },
-          reportStat: function (callback){
-            NER.count({where: {report: 1}})
+          reportStat: function (reportCallback){
+            NER.count({where: {task:task, report: 1}})
               .then(function (c){
-                callback(null, c)
+                reportCallback(null, c)
               })
               .catch(function (err){
-                callback(err);
+                reportCallback(err);
               })
           }
         }, 
         function (err, results){
           if(err){
-            return res.status(500).send(ERROR_CODES.internalServerError);
+            return callback(ERROR_CODES.internalServerError);
           }else{
-            res.json(results);
+            return callback(null, results);
           }
         });
+        return null;
     })
     .catch(function (err){
-      return res.status(500).send(ERROR_CODES.internalServerError);
+      callback(ERROR_CODES.internalServerError);
+      return null;
     })
-};
+}
 
+NERInterface.countNERSentences = function (data, callback){
+  var task = data.task;
+  NER.count({where: {task:task}})
+}
 
-NERHandler.setUntaggedSen = function (req, res, next){
-  var senId = req.body.id;
-  var report = req.body.report;
-
+NERInterface.setUntaggedSen = function (data, callback){
   NER.update(
-    {tagged: 0, report: report, updateAt: utils.addHours(Date.now(), 7)},
-    {where: {id: senId}})
+    {tagged: 0, report: data.report, updateAt: utils.addHours(Date.now(), 7)},
+    {where: {id: data.senId}})
     .then(function (result) {
       // Update tagged field
-      return res.status(200).send({});
+      callback(null, result);
+      return null;
     })
     .catch(function (err){
-      return res.status(500).send(ERROR_CODES.internalServerError);
+      callback(ERROR_CODES.internalServerError);
+      return null;
     })
-};
+}
 
 
-NERHandler.pagingSen = function (req, res, next){
-  var lastItemDate = req.body.lastItemDate;
-  var pageCount = req.body.pageCount;
-
-  if (lastItemDate === null || typeof lastItemDate === 'undefined'){
-    lastItemDate = 2e9;
-  }
+NERInterface.pagingSen = function (data, callback){
+  var offset = data.offset;
+  var limit = data.limit;
 
   NER.findAll({
-      where:{
-        createAt:{
-          [Op.lte]: lastItemDate
-        }
-      },
-      limit: pageCount,
+      limit: limit,
+      offset: offset,
       order: [['createAt', 'DESC']],
 
   })
@@ -285,14 +313,14 @@ NERHandler.pagingSen = function (req, res, next){
         intent: retSen.intent
       })
     }
-    res.json(compactResults);
+    callback(null, compactResults);
+    return null;
   })
   .catch(function (err){
-    return res.status(500).send(err);
+    callback(err);
+    return null;
   })
-};
+}
 
 
-
-
-module.exports = NERHandler;
+module.exports = NERInterface;

@@ -2,17 +2,27 @@ const Sequelize = require('sequelize');
 var FlakeId = require('flakeid');
 
 var db = new Sequelize(
-    'collector', 'root', '123qwe',{host: 'localhost', dialect: 'mysql'});
+    'collector', 'root', '123qwe',
+    {
+      host: 'localhost', dialect: 'mysql', 
+      pool: {
+        maxConnections : 200,
+        minConnections : 1,
+        maxIdleTime: 3600000
+      },
+      logging: false
+    });
+
 const Op = Sequelize.Op;
 
 var NER = db.define('ner',{
-  id: {type: Sequelize.BIGINT, primaryKey: true},
+  id: {type: Sequelize.BIGINT(11), primaryKey: true},
   sentence: {type: Sequelize.TEXT('medium'), allowNull: false},
   task: {type: Sequelize.STRING, allowNull: false},
-  tagged: {type: Sequelize.BOOLEAN, allowNull: false},
+  tagged: {type: Sequelize.BOOLEAN, allowNull: false, defaultValue: 0},
   hash: {type: Sequelize.CHAR(32), allowNull: false},
   intent: {type: Sequelize.STRING, allowNull: true},
-  report: {type: Sequelize.BOOLEAN},
+  report: {type: Sequelize.BOOLEAN, defaultValue: 0},
   taggedSentence: {type: Sequelize.TEXT('medium'), allowNull: true},
   createAt: {type: Sequelize.DATE, defaultValue: Sequelize.NOW, allowNull: false},
   updateAt: {type: Sequelize.DATE, defaultValue: Sequelize.NOW, allowNull: false}

@@ -10,5 +10,9 @@ export const ERROR_CODES = {
   internalServerError:{
     message: "A occur error on server",
     name: "INTERNAL_SERVER_ERROR"
+  },
+  invalidInput:{
+    message: "Input values are invalid",
+    name: "INVALID_INPUT"
   }
 }

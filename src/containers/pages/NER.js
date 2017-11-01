@@ -3,7 +3,8 @@ import { Switch, Route, NavLink } from 'react-router-dom'
 import { SenTaggers } from '../../components/SentenceTaggers'
 import NERStatistics from '../../components/NERStatistics'
 import NERImports from '../../components/NERImports'
-import './pages.css'
+import NERReview from '../../components/NERReview'
+import '../../css/pages.css'
 
 
 export default class NERPage extends Component {
@@ -26,6 +27,7 @@ export default class NERPage extends Component {
           <Route exact path="/ner" component={SenTaggers}/>
           <Route path="/ner/tagging" component={SenTaggers}/>
           <Route path="/ner/statistics" component={NERStatistics}/>
+          <Route path="/ner/review" component={NERReview}/>
           <Route path="/ner/import" component={NERImports}/>
         </Switch>
       </div>

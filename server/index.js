@@ -1,13 +1,15 @@
 const app = require('./app')
-
 const PORT = process.env.PORT || 3001
 
 // Why don't I need http createServer
 
-app.listen(PORT, ()=>{
+global.io = require('socket.io').listen(
+  app.listen(PORT, ()=>{
   console.log(`App listening on port ${PORT}!`)
-})
+}))
 app.on('error', onError)
+
+const socketIO = require('./socket');
 
 function onError(error) {
   if (error.syscall !== 'listen') {
@@ -33,3 +35,5 @@ function onError(error) {
   }
 }
 
+// setup socket.io
+socketIO.setupSocket();

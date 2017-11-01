@@ -1,0 +1,31 @@
+.statistic-page{
+  margin-left: 50px;
+  margin-top: 50px;
+}
+
+div.stat-text{
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+th.tagged-col{
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+th.untagged-col{
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+td.tagged-stat-item{
+  text-align: center;
+}
+
+td.untagged-stat-item{
+  text-align: center;
+}
+
+div.intent-stat-item{
+  padding: 3px;
+}

@@ -132,14 +132,6 @@ div.sentence-inline>div.tags>div.add-tag:hover{
   border-radius: 5px; 
 }
 
-.inline{
-  display: inline;
-}
-
-.text-bold-600{
-  font-weight: 600;
-}
-
 .bt-container{
   padding-top: 20px;
   position: absolute;

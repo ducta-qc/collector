@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { TaskBox } from './SentenceTaggers'
 import { nerAPI } from '../api/Sentence'
-import './NERStatistics.css'
+import '../css/NERStatistics.css'
 
 class TaskStat extends Component {
   constructor (props){
@@ -29,15 +29,32 @@ class TaskStat extends Component {
     var reportStat = props.statInfo.reportStat;
     var intents = Object.keys(intentStat);;
 
-    elems.push(<div className="intent-stat-item" key={'*_0'}><b>Total</b> - Tagged: {intentStat['*'].tagged}, Untagged:{intentStat['*'].untagged}</div>);
-    elems.push(<div className="intent-stat-item" key={'_1'}><b>Null</b> - Tagged: {intentStat[''].tagged}, Untagged:{intentStat[''].untagged}</div>);
+    elems.push(
+      <tr className="intent-stat-item" key={'*_0'}>
+        <td><b>Total</b></td>
+        <td className="tagged-stat-item">{intentStat['*'].tagged}</td>
+        <td className="untagged-stat-item">{intentStat['*'].untagged}</td>
+      </tr>
+    );
+    elems.push(
+      <tr className="intent-stat-item" key={'_1'}>
+        <td><b>NULL</b></td>
+        <td className="tagged-stat-item">{intentStat[''].tagged}</td>
+        <td className="untagged-stat-item">{intentStat[''].untagged}</td>
+      </tr>
+    );
 
     for (var i=0; i < intents.length; i++){
       if (intents[i] === "*" || 
           intents[i] === ""){
         continue;
       }
-      elems.push(<div className="intent-stat-item" key={intents[i]+'_'+i}>{intents[i]} - Tagged: {intentStat[intents[i]].tagged}, Untagged: {intentStat[intents[i]].untagged}</div>);
+      elems.push(
+        <tr className="intent-stat-item" key={intents[i]+'_'+i}>
+          <td>{intents[i]}</td>
+          <td className="tagged-stat-item">{intentStat[intents[i]].tagged}</td>
+          <td className="untagged-stat-item">{intentStat[intents[i]].untagged}</td>
+        </tr>);
     }
 
     var reportElem = (<div>Reported: {reportStat}</div>)
@@ -49,14 +66,21 @@ class TaskStat extends Component {
     return(
       <div>
         <div>
-          <div className="stat-text text-bold-600">Intent statistics</div>
-          <div>
-            {this.state.intentElems}
-          </div>
           <div className="stat-text text-bold-600">Reported</div>
           <div>
             {this.state.reportElem}
           </div>
+          <div className="stat-text text-bold-600">Intent statistics:</div>
+          <table>
+            <tbody>
+              <tr>
+                <th>Intent</th>
+                <th className="tagged-col">Tagged</th>
+                <th className="untagged-col">Untagged</th>
+              </tr>
+              {this.state.intentElems}
+            </tbody>
+          </table>
         </div>
       </div>
     )
@@ -106,15 +130,18 @@ export default class NERStatistics extends Component {
   }
 
   render (){
+    var displayStat = (this.state.nerTasks.length > 0);
     return (
       <div className="statistic-page">
+        {displayStat ?(
         <div>
           <div className="inline">
             <span className="text-bold-600"> Task: </span>
             <TaskBox ref="taskInput" list={this.state.nerTasks} callback={this.changeTaskCallback.bind(this)}></TaskBox>
           </div>
           <TaskStat statInfo={this.state.statInfo}></TaskStat>
-        </div>
+        </div>):
+        (null)}
       </div>
     )
   }

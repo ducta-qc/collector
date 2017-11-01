@@ -37,6 +37,24 @@ var importTaggedSentence = function (data, callback, errCb){
   })
 };
 
+var importUntaggedSentence = function (data, callback, errCb){
+  $.ajax({
+    type: ENDPOINTS.importUntaggedSen.type,
+    url: ENDPOINTS.importUntaggedSen.url,
+    contentType: ENDPOINTS.importUntaggedSen.contentType,
+    dataType: ENDPOINTS.importUntaggedSen.dataType,
+    data: JSON.stringify(data),
+    success: function(msg){
+      callback(msg);
+    },
+    error: function(xhr, textStatus, error){
+      if (typeof errCb !== 'undefined'){
+        errCb(xhr.responseJSON);
+      }
+    }
+  })
+};
+
 var reportSentence = function (data, callback, errCb){
   $.ajax({
     type: ENDPOINTS.reportSen.type,
@@ -94,6 +112,7 @@ var getNERTasksStat = function (data, callback, errCb){
 var nerAPI = {
   getRawSentence: getRawSentence,
   importTaggedSentence: importTaggedSentence,
+  importUntaggedSentence: importUntaggedSentence,
   reportSentence: reportSentence,
   getNERTasks: getNERTasks,
   getNERTasksStat: getNERTasksStat

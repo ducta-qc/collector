@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import './SentenceTaggers.css'
+import '../css/SentenceTaggers.css'
 import { nerAPI } from '../api/Sentence'
 import { TAGS, INTENTS } from '../types/car'
 import { ERROR_CODES } from '../../src/types/errorCodes'
@@ -213,6 +213,7 @@ class SenTaggers extends Component {
       intents: INTENTS,
       intent: INTENTS[0]
     };
+    this._isMounted = false;
   }
 
   initParams(){
@@ -226,6 +227,7 @@ class SenTaggers extends Component {
 
   componentDidMount() {
     // Get NER tasks in database
+    this._isMounted = true;
     nerAPI.getNERTasks({},
     function (results){
       this.setState({nerTasks: results});
@@ -319,11 +321,11 @@ class SenTaggers extends Component {
   }
 
   componentWillMount() {
-      document.addEventListener("keydown", this.enter.bind(this));
+    document.addEventListener("keydown", this.enter.bind(this));
   }
 
   componentWillUnmount() {
-      document.removeEventListener("keydown", this.enter.bind(this));
+    document.removeEventListener("keydown", this.enter.bind(this));
   }  
 
   enter(e) {

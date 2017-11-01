@@ -11,6 +11,12 @@ var ENDPOINTS = {
     contentType: "application/json",
     dataType: "json"
   },
+  importUntaggedSen: {
+    url: "/api/import_untagged_sen",
+    type: "POST",
+    contentType: "application/json",
+    dataType: "json"
+  },
   reportSen:{
     url: "/api/report_sen",
     type: "POST",

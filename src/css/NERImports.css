@@ -1,0 +1,64 @@
+.ner-imports {
+  position: relative;
+  margin-left: 50px;
+  margin-top: 50px;
+}
+
+div.manual-import {
+  padding-top: 30px;	
+}
+
+div.manual-error-msg{
+  padding-top: 10px;
+  color: red;
+};
+
+div.manual-task {
+  padding-top: 5px;
+}
+
+div.manual-task>input {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+div.manual-sentence {
+  padding-top: 5px;
+}
+
+div.manual-sentence>input {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  width: 400px;
+}
+
+div.manual-intent {
+  padding-top: 5px;
+}
+
+div.manual-intent>input{
+  padding-top: 4px;
+  padding-bottom: 4px; 
+}
+
+div.manual-submit {
+  padding-top: 10px;
+}
+
+div.csv-import {
+  padding-top: 30px;
+}
+
+div.csv-file {
+  padding-top: 5px;
+}
+
+div.csv-file>input {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+
+div.csv-submit {
+  padding-top: 10px;
+}

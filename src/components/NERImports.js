@@ -242,7 +242,7 @@ class ImportFromCSV extends Component {
           i++;
           continue; 
         }
-        intent = lines[i].substring(lastCommasIdx+1, lines[i].length);
+        intent = lines[i].substring(lastCommasIdx+1, lines[i].length).replace("\r","");
         self.bucket.push({
           sentence: sentence, intent: intent, task: task
         })

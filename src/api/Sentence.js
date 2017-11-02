@@ -73,6 +73,25 @@ var reportSentence = function (data, callback, errCb){
   })
 }
 
+var untagSentence = function (data, callback, errCb){
+  $.ajax({
+    type: ENDPOINTS.untagSen.type,
+    url: ENDPOINTS.untagSen.url,
+    contentType: ENDPOINTS.untagSen.contentType,
+    dataType: ENDPOINTS.untagSen.dataType,
+    data: JSON.stringify(data),
+    success: function(msg){
+      callback(msg);
+    },
+    error: function(xhr, textStatus, error){
+      if (typeof errCb !== 'undefined'){
+        errCb(xhr.responseJSON);
+      }
+    }
+  })
+}
+
+
 var getNERTasks = function (data, callback, errCb){
   $.ajax({
     type: ENDPOINTS.getNERTasks.type,
@@ -109,13 +128,52 @@ var getNERTasksStat = function (data, callback, errCb){
   })
 }
 
+var countNERSentences = function (data, callback, errCb){
+  $.ajax({
+    type: ENDPOINTS.countNERSens.type,
+    url: ENDPOINTS.countNERSens.url,
+    contentType: ENDPOINTS.countNERSens.contentType,
+    dataType: ENDPOINTS.countNERSens.dataType,
+    data: JSON.stringify(data),
+    success: function(msg){
+      callback(msg);
+    },
+    error: function(xhr, textStatus, error){
+      if (typeof errCb !== 'undefined'){
+        errCb(xhr.responseJSON);
+      }
+    }
+  })
+}
+
+var pagingSentence = function (data, callback, errCb){
+  $.ajax({
+    type: ENDPOINTS.pagingSens.type,
+    url: ENDPOINTS.pagingSens.url,
+    contentType: ENDPOINTS.pagingSens.contentType,
+    dataType: ENDPOINTS.pagingSens.dataType,
+    data: JSON.stringify(data),
+    success: function(msg){
+      callback(msg);
+    },
+    error: function(xhr, textStatus, error){
+      if (typeof errCb !== 'undefined'){
+        errCb(xhr.responseJSON);
+      }
+    }
+  })
+}
+
 var nerAPI = {
   getRawSentence: getRawSentence,
   importTaggedSentence: importTaggedSentence,
   importUntaggedSentence: importUntaggedSentence,
   reportSentence: reportSentence,
+  untagSentence: untagSentence,
   getNERTasks: getNERTasks,
-  getNERTasksStat: getNERTasksStat
+  getNERTasksStat: getNERTasksStat,
+  countNERSentences: countNERSentences,
+  pagingSentence: pagingSentence
 };
 
 export{nerAPI}

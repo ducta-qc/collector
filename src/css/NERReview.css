@@ -1,0 +1,115 @@
+.review-page{
+  margin-left: 50px;
+  margin-top: 50px;
+}
+
+div.page-numbers-container{
+  text-align: center;
+}
+
+ul.page-numbers{
+  list-style-type: none;
+}
+
+ul.page-numbers>li{
+  display: inline-block;
+  padding: 5px;
+  text-decoration: underline;
+}
+
+ul.page-numbers>li:first-child{
+  text-decoration: none;
+}
+
+ul.page-numbers>li.not-underline{
+  text-decoration: none;
+  color: #FF9800;
+}
+
+ul.page-numbers>li:hover{
+  cursor: pointer;
+}
+
+ul.page-numbers>li:first-child:hover{
+  cursor: auto;
+}
+
+table.review-table{
+  border-collapse: collapse; 
+}
+
+tr.review-col{
+  border: 2px solid black;
+}
+
+th.sentence{
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+
+th.tagged{
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+th.reported{
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+th.action{
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+td.sentence{
+  padding-left: 10px;
+  width: 500px;
+  word-wrap: break-word;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid black;
+  border-left: 2px solid black;
+  border-right: 1px solid black;
+}
+
+td.intent{
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+}
+
+td.tagged{
+  border-bottom: 1px solid black; 
+  border-right: 1px solid black;
+  color: #cc3300;
+  text-align: center;
+}
+
+td.tagged.true{
+  color: #00cc00;
+}
+
+td.report{
+  border-bottom: 1px solid black;  
+  border-right: 1px solid black;
+  color: #00cc00;
+  text-align: center;
+}
+
+td.report.true{
+  color: #cc3300
+}
+
+td.action{
+  padding-right: 10px;
+  padding-left: 10px;
+  border-bottom: 1px solid black; 
+  border-right: 2px solid black;
+}
+
+div.review-table-container{
+  display: inline-block;
+}

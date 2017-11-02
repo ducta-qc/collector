@@ -173,6 +173,21 @@ NERInterface.reportSentence = function (data, callback){
     })
 }
 
+NERInterface.untagSentence = function (data, callback){
+  var id = data.id;
+  NER.update(
+    {tagged: 0, updateAt: utils.addHours(Date.now(), 7)},
+    {where: {id: senId}})
+    .then(function (result) {
+      callback(null, {});
+      return null;
+    })
+    .catch(function (err){
+      callback(ERROR_CODES.internalServerError);
+      return null;
+    })
+}
+
 
 NERInterface.getNERTaskStat = function (data, callback){
   var task = data.task;
@@ -270,6 +285,14 @@ NERInterface.getNERTaskStat = function (data, callback){
 NERInterface.countNERSentences = function (data, callback){
   var task = data.task;
   NER.count({where: {task:task}})
+    .then(function (c){
+      callback(null, {senCount: c});
+      return null;
+    })
+    .catch(function (err){
+      callback(err);
+      return null;
+    })
 }
 
 NERInterface.setUntaggedSen = function (data, callback){
@@ -304,6 +327,7 @@ NERInterface.pagingSen = function (data, callback){
     }
     var compactResults = [];
     for (var i=0; i < results.length; i++){
+      var retSen = results[i];
       compactResults.push({
         id: retSen.id,
         sentence: retSen.sentence,

@@ -23,6 +23,12 @@ var ENDPOINTS = {
     contentType: "application/json",
     dataType: "json"
   },
+  untagSen:{
+    url: "/api/untag_sen",
+    type: "POST",
+    contentType: "application/json",
+    dataType: "json"
+  },
   getNERTasks: {
     url: "/api/get_ner_tasks",
     type: "POST",
@@ -31,6 +37,18 @@ var ENDPOINTS = {
   },
   getNERTasksStat: {
     url: "/api/get_ner_tasks_stat",
+    type: "POST",
+    contentType: "application/json",
+    dataType: "json"
+  },
+  countNERSens: {
+    url: "/api/count_ner_sentences",
+    type: "POST",
+    contentType: "application/json",
+    dataType: "json"
+  },
+  pagingSens: {
+    url: "/api/paging",
     type: "POST",
     contentType: "application/json",
     dataType: "json"

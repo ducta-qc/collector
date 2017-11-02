@@ -10,7 +10,7 @@ var db = new Sequelize(
         minConnections : 1,
         maxIdleTime: 3600000
       },
-      logging: false
+      logging: true
     });
 
 const Op = Sequelize.Op;

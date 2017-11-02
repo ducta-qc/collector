@@ -72,6 +72,20 @@ NERHandler.reportSentence = function (req, res, next){
   )
 };
 
+NERHandler.untagSentence = function (req, res, next){
+  var senId = req.body.id;
+
+  NERInterface.untagSentence(
+    {id: senId},
+    function (err, results){
+      if(err){
+        return res.status(500).send(err);  
+      }
+      return res.json(results);
+    }
+  )
+};
+
 
 NERHandler.getNERTaskStat = function (req, res, next){
   var task = req.body.task;
@@ -111,6 +125,7 @@ NERHandler.pagingSen = function (req, res, next){
     {offset: offset, limit: limit},
     function (err, results){
       if(err){
+        console.log(err)
         return res.status(500).send(err);  
       }
       return res.json(results);  

@@ -12,8 +12,11 @@ class TaskStat extends Component {
     }
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.buildElems(this.props);
+  }
+  
+  componentDidMount() {
   }
 
   componentWillReceiveProps(nextProps){
@@ -71,9 +74,9 @@ class TaskStat extends Component {
             {this.state.reportElem}
           </div>
           <div className="stat-text text-bold-600">Intent statistics:</div>
-          <table>
+          <table className="stat-table">
             <tbody>
-              <tr>
+              <tr className="stat-col">
                 <th>Intent</th>
                 <th className="tagged-col">Tagged</th>
                 <th className="untagged-col">Untagged</th>

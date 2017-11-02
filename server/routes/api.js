@@ -25,12 +25,24 @@ router.post('/report_sen', function (req, res, next){
   NERHandler.reportSentence(req, res, next);
 })
 
+router.post('/untag_sen', function (req, res, next){
+  NERHandler.reportSentence(req, res, next);
+})
+
 router.post('/get_ner_tasks', function (req, res, next){
   NERHandler.getNERTasks(req, res, next);
 })
 
 router.post('/get_ner_tasks_stat', function (req, res, next){
   NERHandler.getNERTaskStat(req, res, next);
+})
+
+router.post('/count_ner_sentences', function (req, res, next){
+  NERHandler.countNERSentences(req, res, next);
+})
+
+router.post('/paging', function (req, res, next){
+  NERHandler.pagingSen(req, res, next);
 })
 
 module.exports = router;

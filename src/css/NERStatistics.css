@@ -29,3 +29,11 @@ td.untagged-stat-item{
 div.intent-stat-item{
   padding: 3px;
 }
+
+table.stat-table{
+  border-collapse: collapse; 
+}
+
+tr.stat-col{
+  border: 2px solid black;
+}

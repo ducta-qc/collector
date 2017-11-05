@@ -26,7 +26,7 @@ router.post('/report_sen', function (req, res, next){
 })
 
 router.post('/untag_sen', function (req, res, next){
-  NERHandler.reportSentence(req, res, next);
+  NERHandler.untagSentence(req, res, next);
 })
 
 router.post('/get_ner_tasks', function (req, res, next){

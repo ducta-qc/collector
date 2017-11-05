@@ -4,6 +4,7 @@ import { SenTaggers } from '../../components/SentenceTaggers'
 import NERStatistics from '../../components/NERStatistics'
 import NERImports from '../../components/NERImports'
 import NERReview from '../../components/NERReview'
+import NERGuide from '../../components/NERGuide'
 import '../../css/pages.css'
 
 
@@ -29,6 +30,7 @@ export default class NERPage extends Component {
           <Route path="/ner/statistics" component={NERStatistics}/>
           <Route path="/ner/review" component={NERReview}/>
           <Route path="/ner/import" component={NERImports}/>
+          <Route paht="/ner/update" component={NERGuide}/>
         </Switch>
       </div>
     )

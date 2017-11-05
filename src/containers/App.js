@@ -3,9 +3,12 @@ import { Switch, Route } from 'react-router-dom'
 import NERPage from './pages/NER'
 import io from 'socket.io-client'
 
+const isBrowser = typeof window !== 'undefined';
 export default class App extends Component {
   componentWillMount(){
-    window.socket = io('http://'+window.location.host);
+    if(isBrowser){
+      window.socket = io('http://'+window.location.host);
+    }
   }
   render(){
     return (

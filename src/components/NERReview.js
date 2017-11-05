@@ -82,10 +82,10 @@ class SentenceTable extends Component{
   displayByPage(sentences){
     var elems = [];
     for (var i=0; i < sentences.length; i++){
-
       elems.push(
-        <tr key={sentences[i].hash}>
+        <tr key={sentences[i].id}>
           <td className="sentence">{sentences[i].sentence}</td>
+          <td className="sentence">{sentences[i].taggedSentence}</td>
           <td className="intent">{sentences[i].intent}</td>
           <td className={"tagged" + (sentences[i].tagged?" true":"")}>{sentences[i].tagged?"✔":"✗"}</td>
           <td className={"report" + (sentences[i].report?" true":"")}>{sentences[i].report?"✗":"✔"}</td>
@@ -226,7 +226,8 @@ class SentenceTable extends Component{
           <table className="review-table">
             <tbody>
               <tr className="review-col">
-                <th className="sentence">Sentence</th>
+                <th className="sentence">Raw Sentence</th>
+                <th className="sentence">Processed Sentence</th>
                 <th>Intent</th>
                 <th className="tagged">Tagged</th>
                 <th className="reported">Not Reported</th>

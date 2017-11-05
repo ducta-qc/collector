@@ -166,6 +166,7 @@ class IntentMenu extends Component{
     if (!intent){
       this.setState({elems: elems});  
     }else{
+      console.log(intent);
       this.setState({elems: elems, intent:intent});
     }
     
@@ -176,7 +177,7 @@ class IntentMenu extends Component{
   }
 
   componentWillReceiveProps(nextProps){
-    if (this.props.initIntent !== nextProps.initIntent || 
+    if (this.state.intent !== nextProps.initIntent || 
       this.props.list.length < nextProps.list.length){
       this.updateWithProps(nextProps, nextProps.initIntent);
     }
@@ -204,23 +205,25 @@ var DEFAULT_ERROR_TEXT = "Please fill the task field and press submit button to 
 class SenTaggers extends Component {
   constructor (props){
     super(props);
-    this.tags = TAGS;
+    this.tags = TAGS.sort();
+    this.tags = ['O'].concat(this.tags);
     this.initParams();
+    var sortedIntents = INTENTS.sort();
+
     this.state = {
       elemToks: [],
       errorDisplayText: DEFAULT_ERROR_TEXT,
       nerTasks: [],
-      intents: INTENTS,
-      intent: INTENTS[0]
+      intents: sortedIntents,
+      intent: sortedIntents[0]
     };
     this._isMounted = false;
   }
 
   initParams(){
-    this.currSenId = -1;
+    this.currSenId = "";
     this.currSen = "";
     this.currIntent = "";
-    this.hash = "";
     this.currTags = [];
     this.tokens = [];
   }
@@ -270,7 +273,6 @@ class SenTaggers extends Component {
         this.currSenId = result.id;
         this.currSen = result.sentence;
         this.currIntent = result.intent;
-        this.hash = result.hash;
         var renderTokens = this.renderTokens.bind(this);
         renderTokens();
       }.bind(this),
@@ -279,7 +281,6 @@ class SenTaggers extends Component {
           if(error.name === ERROR_CODES.taggedSenNotFound.name){
             this.currSen = "";
             this.currIntent = "";
-            this.hash = "";
             this.currTags = [];
             this.tokens = [];
             this.setState({elemToks:[], errorDisplayText: ERROR_CODES.taggedSenNotFound.message});
@@ -297,18 +298,20 @@ class SenTaggers extends Component {
       var concatToks = "";
       for (var i=0; i < this.currTags.length; i++){
         if (this.currTags[i] !== ""){
-          concatToks += (this.tokens[i] + "/" + this.currTags[i]);
+          concatToks += " " + (this.tokens[i] + "/" + this.currTags[i]);
           taggedToks.push(concatToks);
           concatToks = "";
         }else{
-          concatToks += this.tokens[i];
+          concatToks += " " + this.tokens[i];
         }
       }
 
       var taggedSen = taggedToks.join(" | ");
-      
+      taggedSen = taggedSen.trim();
       nerAPI.importTaggedSentence(
-        {taggedSens:[{sentence: taggedSen, hash: this.hash, intent: this.currIntent, task: taskElem.state.inputValue}]}, 
+        {taggedSens:[
+          {sentence: taggedSen, id: this.currSenId, 
+          intent: this.currIntent, task: taskElem.state.inputValue}]}, 
         function (result){
           var fetchRawSentence = this.fetchRawSentence.bind(this);
           fetchRawSentence(); 

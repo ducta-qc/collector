@@ -16,11 +16,10 @@ var db = new Sequelize(
 const Op = Sequelize.Op;
 
 var NER = db.define('ner',{
-  id: {type: Sequelize.BIGINT(11), primaryKey: true},
+  id: {type: Sequelize.CHAR(32), primaryKey: true, allowNull: false},
   sentence: {type: Sequelize.TEXT('medium'), allowNull: false},
   task: {type: Sequelize.STRING, allowNull: false},
   tagged: {type: Sequelize.BOOLEAN, allowNull: false, defaultValue: 0},
-  hash: {type: Sequelize.CHAR(32), allowNull: false},
   intent: {type: Sequelize.STRING, allowNull: true},
   report: {type: Sequelize.BOOLEAN, defaultValue: 0},
   taggedSentence: {type: Sequelize.TEXT('medium'), allowNull: true},
@@ -32,7 +31,7 @@ var NER = db.define('ner',{
 });
 
 var flake = new FlakeId({
-    mid : 42, //optional, define machine id 
+    mid : 1, //optional, define machine id 
     timeOffset : (2017-1970)*31536000*1000 //optional, define a offset time 
 });
 

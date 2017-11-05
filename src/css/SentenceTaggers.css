@@ -23,6 +23,7 @@ div.dropdown-container.show>div.dropdown-list {
   transform: scale(1, 1); 
   background-color: #FFF;
   z-index: 1;
+  display: inline;
 }
 
 div.dropdown-container>div.dropdown-display {
@@ -66,7 +67,7 @@ div.dropdown-container>div.dropdown-list {
   float: left; 
   width: 100%; 
   position: relative; 
-  width: 100%; 
+  display: none;
   transform: scale(1, 0);
 }
 
@@ -134,8 +135,6 @@ div.sentence-inline>div.tags>div.add-tag:hover{
 
 .bt-container{
   padding-top: 20px;
-  position: absolute;
-  top: 130px;
 }
 
 .bt-container>div{

@@ -25,7 +25,6 @@ NERInterface.getUntaggedSen = function (data, callback){
               sentence: retSen.sentence,
               task: retSen.task,
               tagged: retSen.tagged,
-              hash: retSen.hash,
               intent: retSen.intent
             };
             callback(null, retSen);
@@ -51,8 +50,7 @@ NERInterface.importUntaggedSen = function (data, callback){
     bulk.push({
       tagged: 0, report:0, sentence: untaggedSen.sentence,
       task: untaggedSen.task, intent: untaggedSen.intent,
-      id: parseInt(flake.gen()),
-      hash: hash,
+      id: hash,
       createdAt:utils.addHours(Date.now(), 7), 
       updateAt: utils.addHours(Date.now(), 7)
     })
@@ -61,16 +59,16 @@ NERInterface.importUntaggedSen = function (data, callback){
   async.waterfall([
     function(subCallback) {
       NER.findAll(
-      {where:{hash:{in:bulkHash}}})
+      {where:{id:{in:bulkHash}}})
       .then(function (results){
         var existHashs = [];
         for (i=0; i < results.length; i++){
-          existHashs.push(results[i].hash);
+          existHashs.push(results[i].id);
         }
 
         var filterBulk = [];
         for (i=0; i < bulk.length; i++){
-          if(existHashs.indexOf(bulk[i].hash) === -1){
+          if(existHashs.indexOf(bulk[i].id) === -1){
             filterBulk.push(bulk[i]);
           }else{
             console.log("Replicate:", bulk[i].sentence);
@@ -115,8 +113,9 @@ NERInterface.importTaggedSen = function (data, callback){
       }
       NER.update(
         {tagged: 1, taggedSentence:taggedSen.sentence, 
+          intent: taggedSen.intent,
          report: report, updateAt: utils.addHours(Date.now(), 7)},
-        {where: {hash: taggedSen.hash}})
+        {where: {id: taggedSen.id}})
         .then(function (result) {
           // Update tagged field
             eachCallback()
@@ -162,7 +161,7 @@ NERInterface.reportSentence = function (data, callback){
   var id = data.id;
   NER.update(
     {report: 1, updateAt: utils.addHours(Date.now(), 7)},
-    {where: {id: senId}})
+    {where: {id: id}})
     .then(function (result) {
       callback(null, {});
       return null;
@@ -177,7 +176,7 @@ NERInterface.untagSentence = function (data, callback){
   var id = data.id;
   NER.update(
     {tagged: 0, updateAt: utils.addHours(Date.now(), 7)},
-    {where: {id: senId}})
+    {where: {id: id}})
     .then(function (result) {
       callback(null, {});
       return null;
@@ -297,7 +296,7 @@ NERInterface.countNERSentences = function (data, callback){
 
 NERInterface.setUntaggedSen = function (data, callback){
   NER.update(
-    {tagged: 0, report: data.report, updateAt: utils.addHours(Date.now(), 7)},
+    {tagged: 0, updateAt: utils.addHours(Date.now(), 7)},
     {where: {id: data.senId}})
     .then(function (result) {
       // Update tagged field
@@ -333,8 +332,9 @@ NERInterface.pagingSen = function (data, callback){
         sentence: retSen.sentence,
         task: retSen.task,
         tagged: retSen.tagged,
-        hash: retSen.hash,
-        intent: retSen.intent
+        intent: retSen.intent,
+        taggedSentence: retSen.taggedSentence,
+        report: retSen.report
       })
     }
     callback(null, compactResults);

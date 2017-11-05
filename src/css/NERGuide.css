@@ -1,0 +1,9 @@
+.ner-guide {
+  position: relative;
+  margin-left: 50px;
+  margin-top: 50px;
+}
+
+table.table-intent>tbody>tr>th{
+  text-align: left;
+}

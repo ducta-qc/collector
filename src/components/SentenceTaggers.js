@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import '../css/SentenceTaggers.css'
 import { nerAPI } from '../api/Sentence'
-import { TAGS, INTENTS } from '../types/car'
+import { MAP_INTENTS_TO_TAGS } from '../types/car'
 import { ERROR_CODES } from '../../src/types/errorCodes'
 
 
@@ -164,9 +164,12 @@ class IntentMenu extends Component{
       elems.push(<option key={props.list[i]} value={props.list[i]}>{props.list[i]}</option>);
     }
     if (!intent){
-      this.setState({elems: elems});  
+      if(intent === ""){
+        this.setState({elems: elems, intent:""});  
+      }else{
+        this.setState({elems: elems});  
+      }
     }else{
-      console.log(intent);
       this.setState({elems: elems, intent:intent});
     }
     
@@ -177,10 +180,8 @@ class IntentMenu extends Component{
   }
 
   componentWillReceiveProps(nextProps){
-    if (this.state.intent !== nextProps.initIntent || 
-      this.props.list.length < nextProps.list.length){
-      this.updateWithProps(nextProps, nextProps.initIntent);
-    }
+    this.updateWithProps(nextProps, nextProps.initIntent);
+    // this.props.callback(oldValue, nextProps.initIntent);
   }
 
   handleChange(e) {
@@ -205,25 +206,29 @@ var DEFAULT_ERROR_TEXT = "Please fill the task field and press submit button to 
 class SenTaggers extends Component {
   constructor (props){
     super(props);
-    this.tags = TAGS.sort();
-    this.tags = ['O'].concat(this.tags);
-    this.initParams();
-    var sortedIntents = INTENTS.sort();
-
+    var sortedMainIntents = Object.keys(MAP_INTENTS_TO_TAGS).sort();
+    var sortedSubIntents = Object.keys(MAP_INTENTS_TO_TAGS[sortedMainIntents[0]]).sort();
+    this.tags = MAP_INTENTS_TO_TAGS[sortedMainIntents[0]][sortedSubIntents[0]]
     this.state = {
       elemToks: [],
       errorDisplayText: DEFAULT_ERROR_TEXT,
       nerTasks: [],
-      intents: sortedIntents,
-      intent: sortedIntents[0]
+      mainIntents: sortedMainIntents,
+      mainIntent: sortedMainIntents[0],
+      subIntents: sortedSubIntents,
+      subIntent: sortedSubIntents[0]
     };
+    this.initParams();
     this._isMounted = false;
   }
 
   initParams(){
     this.currSenId = "";
     this.currSen = "";
-    this.currIntent = "";
+    this.currMainIntent = this.state.mainIntent;
+    this.currSubIntent = this.state.subIntent;
+    this.orgMainIntent = "";
+    this.orgSubIntent = "";
     this.currTags = [];
     this.tokens = [];
   }
@@ -242,10 +247,11 @@ class SenTaggers extends Component {
   }
 
   renderTokens() {
-    var intents = this.state.intents;
-    if(this.state.intents.indexOf(this.currIntent) === -1){
-      intents = [this.currIntent].concat(intents);
-    }
+    // var subIntents = this.state.subIntents;
+
+    // if(this.state.mainIntents.indexOf(this.currIntent) === -1){
+    //   intents = [this.currIntent].concat(intents);
+    // }
     this.tokens = this.currSen.split(" ");
     this.currTags = [];
     for (var i=0; i < this.tokens.length; i++){
@@ -257,11 +263,15 @@ class SenTaggers extends Component {
       elemToks.push(
         <div className={"sentence-inline"} key={this.tokens[i]+"_"+i}>
           {this.tokens[i]}
-          <TagDropdownMenu list={this.tags} selected={this.currTags[i]} tokIdx={i} callback={this.updateTags.bind(this)}>
+          <TagDropdownMenu 
+            list={this.tags} 
+            selected={this.currTags[i]} tokIdx={i} callback={this.updateTags.bind(this)}>
           </TagDropdownMenu>
         </div> );
     }
-    this.setState({ elemToks: elemToks, intents: intents, intent: this.currIntent});
+    this.setState({ elemToks: elemToks,
+                    mainIntent: this.currMainIntent, 
+                    subIntent:this.currSubIntent});
   }
 
   fetchRawSentence(){
@@ -272,17 +282,18 @@ class SenTaggers extends Component {
       function (result){
         this.currSenId = result.id;
         this.currSen = result.sentence;
-        this.currIntent = result.intent;
+        this.orgMainIntent = result.intent;
+        this.orgSubIntent = result.subIntent;
+        // this.currMainIntent = result.intent;
+        // this.currSubIntent = result.subIntent;
+        
         var renderTokens = this.renderTokens.bind(this);
         renderTokens();
       }.bind(this),
       function (error){
         if (typeof error !== 'undefined'){
           if(error.name === ERROR_CODES.taggedSenNotFound.name){
-            this.currSen = "";
-            this.currIntent = "";
-            this.currTags = [];
-            this.tokens = [];
+            this.initParams();
             this.setState({elemToks:[], errorDisplayText: ERROR_CODES.taggedSenNotFound.message});
           }
         }
@@ -295,14 +306,14 @@ class SenTaggers extends Component {
     if (this.currSen !== ""){
       // Submit tagged sentence
       var taggedToks = [];
-      var concatToks = "";
+      var concatToks = [];
       for (var i=0; i < this.currTags.length; i++){
         if (this.currTags[i] !== ""){
-          concatToks += " " + (this.tokens[i] + "/" + this.currTags[i]);
-          taggedToks.push(concatToks);
-          concatToks = "";
+          concatToks.push(this.tokens[i] + "/" + this.currTags[i]);
+          taggedToks.push(concatToks.join(" "));
+          concatToks = [];
         }else{
-          concatToks += " " + this.tokens[i];
+          concatToks.push(this.tokens[i]);
         }
       }
 
@@ -310,8 +321,12 @@ class SenTaggers extends Component {
       taggedSen = taggedSen.trim();
       nerAPI.importTaggedSentence(
         {taggedSens:[
-          {sentence: taggedSen, id: this.currSenId, 
-          intent: this.currIntent, task: taskElem.state.inputValue}]}, 
+          {
+            sentence: taggedSen, id: this.currSenId, 
+            intent: this.currMainIntent, 
+            task: taskElem.state.inputValue,
+            subIntent: this.currSubIntent
+          }]}, 
         function (result){
           var fetchRawSentence = this.fetchRawSentence.bind(this);
           fetchRawSentence(); 
@@ -361,10 +376,27 @@ class SenTaggers extends Component {
     }
   }
 
-  changeIntentCallback(oldValue, newValue){
-    if(oldValue !== newValue){
-      this.currIntent = newValue;
-    }
+  changeMainIntentCallback(oldValue, newValue){
+    // if(oldValue !== newValue){
+    this.currMainIntent = newValue;
+    var subIntents = Object.keys(MAP_INTENTS_TO_TAGS[this.currMainIntent]).sort();
+    this.currSubIntent = subIntents[0];
+    this.tags = MAP_INTENTS_TO_TAGS[this.currMainIntent][this.currSubIntent];
+    
+    this.setState({subIntents: subIntents, 
+                  mainIntent: this.currMainIntent, 
+                  subIntent:this.currSubIntent});
+    this.renderTokens();
+    // }
+  }
+
+  changeSubIntentCallback(oldValue, newValue){
+    // if(oldValue !== newValue){
+    this.currSubIntent = newValue;
+    this.tags = MAP_INTENTS_TO_TAGS[this.currMainIntent][this.currSubIntent];
+    //console.log(this.tags);
+    this.renderTokens();
+    // } 
   }
 
   render (){
@@ -378,12 +410,17 @@ class SenTaggers extends Component {
               <TaskBox ref="taskInput" list={this.state.nerTasks} callback={this.changeTaskCallback.bind(this)}></TaskBox>
             </div>
             <div className="inline intent-box">
-              <span className="text-bold-600"> Intent: </span>
-              <IntentMenu ref="intentInput" list={this.state.intents} 
-              initIntent={this.state.intent} callback={this.changeIntentCallback.bind(this)}></IntentMenu>
+              <span className="text-bold-600"> Main Intent: </span>
+              <IntentMenu ref="mainIntentInput" list={this.state.mainIntents} 
+              initIntent={this.state.mainIntent} callback={this.changeMainIntentCallback.bind(this)}></IntentMenu>
+              <span className="text-bold-600 padding-left-20px"> Sub Intent: </span>
+              <IntentMenu ref="subIntentInput" list={this.state.subIntents} 
+              initIntent={this.state.subIntent} callback={this.changeSubIntentCallback.bind(this)}></IntentMenu>
             </div>
           </div>
           <div className="display-sentence">
+            <p className="text-bold-600">Origin Main Intent: {this.orgMainIntent}</p>
+            <p className="text-bold-600">Origin Sub Intent: {this.orgSubIntent}</p>
             <p className="text-bold-600">Sentence:</p>
             {(senIsNull ?  this.state.errorDisplayText : this.state.elemToks)}
           </div>

@@ -87,6 +87,7 @@ class SentenceTable extends Component{
           <td className="sentence">{sentences[i].sentence}</td>
           <td className="sentence">{sentences[i].taggedSentence}</td>
           <td className="intent">{sentences[i].intent}</td>
+          <td className="intent">{sentences[i].subIntent}</td>
           <td className={"tagged" + (sentences[i].tagged?" true":"")}>{sentences[i].tagged?"✔":"✗"}</td>
           <td className={"report" + (sentences[i].report?" true":"")}>{sentences[i].report?"✗":"✔"}</td>
           <td className="action">
@@ -228,7 +229,8 @@ class SentenceTable extends Component{
               <tr className="review-col">
                 <th className="sentence">Raw Sentence</th>
                 <th className="sentence">Processed Sentence</th>
-                <th>Intent</th>
+                <th>Main Intent</th>
+                <th>Sub Intent</th>
                 <th className="tagged">Tagged</th>
                 <th className="reported">Not Reported</th>
                 <th className="action">Action</th>

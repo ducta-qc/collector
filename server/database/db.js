@@ -21,6 +21,7 @@ var NER = db.define('ner',{
   task: {type: Sequelize.STRING, allowNull: false},
   tagged: {type: Sequelize.BOOLEAN, allowNull: false, defaultValue: 0},
   intent: {type: Sequelize.STRING, allowNull: true},
+  subIntent: {type: Sequelize.STRING, allowNull: true, defaultValue: ""},
   report: {type: Sequelize.BOOLEAN, defaultValue: 0},
   taggedSentence: {type: Sequelize.TEXT('medium'), allowNull: true},
   createAt: {type: Sequelize.DATE, defaultValue: Sequelize.NOW, allowNull: false},

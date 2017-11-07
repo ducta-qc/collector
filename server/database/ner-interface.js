@@ -25,7 +25,8 @@ NERInterface.getUntaggedSen = function (data, callback){
               sentence: retSen.sentence,
               task: retSen.task,
               tagged: retSen.tagged,
-              intent: retSen.intent
+              intent: retSen.intent,
+              subIntent: retSen.subIntent
             };
             callback(null, retSen);
             return null;
@@ -50,7 +51,7 @@ NERInterface.importUntaggedSen = function (data, callback){
     bulk.push({
       tagged: 0, report:0, sentence: untaggedSen.sentence,
       task: untaggedSen.task, intent: untaggedSen.intent,
-      id: hash,
+      id: hash, subIntent: untaggedSen.subIntent,
       createdAt:utils.addHours(Date.now(), 7), 
       updateAt: utils.addHours(Date.now(), 7)
     })
@@ -114,6 +115,7 @@ NERInterface.importTaggedSen = function (data, callback){
       NER.update(
         {tagged: 1, taggedSentence:taggedSen.sentence, 
           intent: taggedSen.intent,
+          subIntent: taggedSen.subIntent,
          report: report, updateAt: utils.addHours(Date.now(), 7)},
         {where: {id: taggedSen.id}})
         .then(function (result) {
@@ -333,6 +335,7 @@ NERInterface.pagingSen = function (data, callback){
         task: retSen.task,
         tagged: retSen.tagged,
         intent: retSen.intent,
+        subIntent: retSen.subIntent,
         taggedSentence: retSen.taggedSentence,
         report: retSen.report
       })

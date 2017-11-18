@@ -52,6 +52,9 @@ class TaskStat extends Component {
           intents[i] === ""){
         continue;
       }
+      if(intentStat[intents[i]].untagged ===0  && intentStat[intents[i]].tagged === 0){
+        continue;
+      }
       elems.push(
         <tr className="intent-stat-item" key={intents[i]+'_'+i}>
           <td>{intents[i]}</td>

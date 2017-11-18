@@ -319,7 +319,7 @@ NERInterface.pagingSen = function (data, callback){
   NER.findAll({
       limit: limit,
       offset: offset,
-      order: [['createAt', 'DESC']],
+      order: [['updateAt', 'DESC']],
 
   })
   .then(function (results){

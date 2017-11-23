@@ -12,8 +12,12 @@ var flake = models.flake;
 
 NERInterface.getUntaggedSen = function (data, callback){
   var task = data.task;
+  var where_ = {tagged: 0, task: task, report: 0};
+  if (data.intent !== undefined){
+    where_.intent = data.intent
+  }
   NER.findAll({
-      where:{tagged: 0, task: task, report: 0}, 
+      where:where_, 
       limit:1})
     .then(function (results){
             if(results.length == 0){

@@ -4,9 +4,9 @@ var NERHandler = {};
 
 NERHandler.getUntaggedSen = function (req, res, next){
   var task = req.body.task;
-
+  var intent = req.body.intent;
   NERInterface.getUntaggedSen(
-    {task: task},
+    {task: task, intent:intent},
     function(err, results){
       if(err){
         return res.status(500).send(err);  

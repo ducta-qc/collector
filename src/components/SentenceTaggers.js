@@ -278,7 +278,7 @@ class SenTaggers extends Component {
     // Get a new sentence
     var taskElem = this.refs.taskInput;
     nerAPI.getRawSentence(
-      {task: taskElem.state.inputValue, intent:"consultant_buy_gender"},
+      {task: taskElem.state.inputValue, intent:"purpose"},
       function (result){
         this.currSenId = result.id;
         this.currSen = result.sentence;
